@@ -1,0 +1,18 @@
+# IDE Config
+.vs/
+.idea/
+.vscode/
+
+# Build Output
+*.o
+*.so
+*.s
+*.obj
+*.exe
+*.out
+*.elf
+*.lib
+*.pdb
+out/
+.zig-cache/
+zig-out/
