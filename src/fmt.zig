@@ -37,26 +37,31 @@ pub fn FormatFn(comptime T: type) type {
 pub const @"struct" = extras.@"struct";
 
 pub const optional = extras.optional;
-pub const formatOptional = extras.formatOptional;
+pub const Optional = extras.Optional;
 
 pub const StackTraceFormatter = @import("StackTraceFormatter.zig");
 
-pub fn stackTrace(trace: anytype) switch (@TypeOf(trace)) {
-    std.builtin.StackTrace,
-    *std.builtin.StackTrace,
-    *const std.builtin.StackTrace,
-    => StackTraceFormatter,
-    ?std.builtin.StackTrace,
-    ?*std.builtin.StackTrace,
-    ?*const std.builtin.StackTrace,
-    => std.fmt.Formatter(formatOptional(?StackTraceFormatter)),
-    else => unreachable,
-} {
-    if (@typeInfo(@TypeOf(trace)) == .optional) {
-        return .{ .data = if (trace) |t| .{ .trace = t } else null };
-    }
-    if (@typeInfo(@TypeOf(trace)) == .pointer) {
+fn StackTrace(comptime T: type) type {
+    return switch (@typeInfo(T)) {
+        .pointer => StackTraceFormatter,
+        .optional => Optional(StackTraceFormatter),
+        else => StackTraceFormatter,
+    };
+}
+
+pub fn stackTrace(trace: anytype) StackTrace(@TypeOf(trace)) {
+    const T = @TypeOf(trace);
+    if (@typeInfo(T) == .optional) {
+        if (@typeInfo(T).optional.child == std.builtin.StackTrace) {
+            return .{ .data = if (trace) |t| .{ .trace = t } else null };
+        } else {
+            return .{ .data = if (trace) |t| .{ .trace = t.* } else null };
+        }
+    } else if (@typeInfo(@TypeOf(trace)) == .pointer) {
         return .{ .trace = trace.* };
+    } else {
+        comptime assert(T == std.builtin.StackTrace);
+        return .{ .trace = trace };
     }
 }
 

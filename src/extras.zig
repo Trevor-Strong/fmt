@@ -4,7 +4,7 @@ const fmt = @import("fmt.zig");
 
 const assert = std.debug.assert;
 
-pub fn optional(value: anytype) std.fmt.Formatter(formatOptional(@TypeOf(value))) {
+pub fn optional(value: anytype) Optional(@TypeOf(value)) {
     return .{ .data = value };
 }
 
@@ -17,16 +17,16 @@ test optional {
     // try expectFmt("", "{}", .{optional(@as(?i32, null))});
 }
 
-pub fn formatOptional(comptime T: type) fmt.FormatFn(T) {
+pub fn Optional(comptime T: type) type {
     return struct {
+        data: ?T,
         fn format(
-            maybe_value: T,
+            self: @This(),
             comptime spec: []const u8,
             options: fmt.Options,
             writer: anytype,
         ) !void {
-            // if (T == @TypeOf(null)) return;
-            const value = maybe_value orelse return;
+            const value = self.data orelse return;
             try std.fmt.formatType(
                 value,
                 spec,
@@ -35,7 +35,7 @@ pub fn formatOptional(comptime T: type) fmt.FormatFn(T) {
                 std.options.fmt_max_depth,
             );
         }
-    }.format;
+    };
 }
 
 pub fn bind(
@@ -111,13 +111,12 @@ pub fn @"struct"(
 
 pub fn StructFormatOptions(comptime T: type) type {
     return struct {
-        pub const Format = FormatSpec;
         const Field = std.meta.FieldEnum(T);
         prefix: []const u8 = ".{ ",
         suffix: []const u8 = " }",
         field: struct {
             /// The format to use for each field or `null` to omit the field.
-            fmt: std.enums.EnumFieldStruct(Field, ?Format, .{ .spec = "any" }) = .{},
+            fmt: std.enums.EnumFieldStruct(Field, ?FormatSpec, .{ .spec = "any" }) = .{},
 
             prefix: []const u8 = "",
             suffix: []const u8 = ", ",
@@ -131,7 +130,7 @@ pub fn StructFormatOptions(comptime T: type) type {
     };
 }
 
-const FormatSpec = struct {
+pub const FormatSpec = struct {
     spec: []const u8,
     options: fmt.Options = .{},
 };
