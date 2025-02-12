@@ -9,7 +9,7 @@ pub const Parser = @import("Parser.zig");
 pub const Placeholder = @import("Placeholder.zig");
 
 pub const default_alignment: Alignment = .right;
-pub const default_fill_char = ' ';
+pub const default_fill = ' ';
 
 pub const filter = @import("filter.zig");
 pub const bind = extras.bind;
