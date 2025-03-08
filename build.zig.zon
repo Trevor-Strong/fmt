@@ -1,5 +1,6 @@
 .{
-    .name = "fmt",
+    .name = .fmt,
+    .fingerprint = 0x3420ce4fb643377a,
     .version = "0.1.0",
     .min_zig_version = "0.14.0-dev.2547+77c63ac36",
     .dependencies = .{},

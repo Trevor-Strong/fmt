@@ -73,7 +73,7 @@ fn ttyForFormatMode(comptime mode: FormatMode, writer: anytype) ?std.io.tty.Conf
                 const info = @typeInfo(W);
                 if (info == .pointer and
                     info.pointer.child == File.Writer and
-                    (info.pointer.size == .One or info.pointer.size == .C))
+                    (info.pointer.size == .one or info.pointer.size == .c))
                 {
                     break :blk io.tty.detectConfig(writer.context);
                 }
